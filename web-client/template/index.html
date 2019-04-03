@@ -10,6 +10,45 @@
     <form action="/upload" method="post" encType="multipart/form-data">
       <input type="file" name="uploadedFile">
       <input type="submit" value="upload">
+      <div id="progress"></div>
     </form>  
   </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+  WebSocketTest();
+  
+  function WebSocketTest() {
+    var url = new URL (window.location.href);
+    var key = url.searchParams.get('key');
+
+    if ("WebSocket" in window) {
+      var ws_stomp_display = new SockJS('http://152.118.148.103:15674/stomp');
+      var client_display = Stomp.over(ws_stomp_display);
+      var mq_queue_display = "/exchange/1506730382/" + key;
+      var on_connect_display = function() {
+        console.log('connected');
+        client_display.subscribe(mq_queue_display, on_message_display);
+      };
+      var on_error_display = function (error) {
+        console.log(error);
+      };
+      var on_message_display = function(x) {
+        console.log('message received');
+        var div = document.getElementById("progress");
+        var messageBody = JSON.parse(x.body); 
+        if (messageBody.status == "compressing") {
+          div.innerHTML = "Compressing... " + messageBody.percent + "%";
+        } else {
+          div.innerHTML = messageBody.status;
+        }
+      };
+
+      client_display.connect("1506730382", "288251", on_connect_display, on_error_display, "1506730382");
+    } else {
+      alert("WebSocket unsupported by the browser");
+    }
+  }
+</script>
 </html>

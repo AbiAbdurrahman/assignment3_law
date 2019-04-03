@@ -3,6 +3,8 @@ const app = express();
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
 const request = require('request');
+const urlLocalhost = 'http://localhost:8001';
+const urlInfralabs = 'http://1506730382.law.infralabs.cs.ui.ac.id:20256'
 
 app.use(fileUpload());
 app.use(cors());
@@ -25,14 +27,15 @@ app.post('/upload', (req, res)=>{
         
         var sent = {
             headers : {
-                'X-ROUTING-KEY' : routeKey
+                'x-routing-key' : routeKey
             },
-            url : "http://localhost:8000/upload",
+            url : urlInfralabs + "/upload", // url docker
+            // url : urlLocalhost + "/upload", // url localhost
             formData : {
                 file : {
                     value : req.files.uploadedFile.data,
                     options : {
-                        fileName : req.files.uploadedFile.name,
+                        filename : req.files.uploadedFile.name,
                         contentType : req.files.uploadedFile.mimetype
                     }
                 }
@@ -47,14 +50,16 @@ app.post('/upload', (req, res)=>{
                 console.log(body);
                 return res.status(200).send(err);
             }
+            console.log(body);
             console.log('file uploaded');
-            res.redirect('/success.html');
+            // res.redirect('/success.html');
+            res.redirect('/?key=' + routeKey);
         });
     } else {
         return res.status(400).send('please input the file to be uploaded');
     }
 });
 
-app.listen(3000, function() {
-	console.log('App listening on port 3000!')
+app.listen(3001, function() {
+	console.log('App listening on port 3001!')
 });
